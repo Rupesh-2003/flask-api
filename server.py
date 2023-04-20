@@ -7,6 +7,7 @@ import os
 from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'mysecretkey'
 
 # create a mock user database with email addresses as keys
