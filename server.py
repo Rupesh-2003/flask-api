@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, make_response
 from functools import wraps
 import requests
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecretkey'
