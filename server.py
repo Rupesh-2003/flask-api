@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = 'mysecretkey'
 # create a mock user database with email addresses as keys
 users = {
     "john@example.com": "password123",
-    "jane@example.com": "secret456"
+    "test@test.com": "test123"
 }
 
 
@@ -19,9 +19,6 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.cookies.get('access_token')
-
-        # if 'Authorization' in request.headers:
-        #     token = request.headers['Authorization'].split(' ')[1]
 
         if not token:
             return jsonify({'message': 'Token is missing'}), 401
@@ -32,6 +29,9 @@ def token_required(f):
         except:
             return jsonify({'message': 'Token is invalid'}), 401
 
+        if current_user not in users:
+            return jsonify({'message': 'User does not exist'}), 401
+        
         return f(current_user, *args, **kwargs)
 
     return decorated
@@ -40,8 +40,14 @@ def token_required(f):
 @app.route('/getData', methods=['GET'])
 @token_required
 def getData(current_user):
-    response = requests.get("https://www.reddit.com/r/images/new.json?limit=30")
-    if(response.ok):
+    # response = requests.get("https://www.reddit.com/r/images/new.json?limit=30")
+
+    url = "https://www.reddit.com/r/images/new.json?limit=30"
+    payload={}
+    headers = {}
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    if(response):
         data = response.json()
 
         # Return the data as a JSON response
@@ -49,6 +55,11 @@ def getData(current_user):
     else:
         # If the request was not successful, return an error message
         return jsonify({'error': 'Unable to retrieve data'}), 500
+
+@app.route('/isLoggedIn', methods=['GET'])
+@token_required
+def isLoggedIn(current_user):
+    return jsonify({'message': 'user is logged in'}), 200
 
 # login route that sends a JWT token upon successful authentication
 @app.route('/login', methods=['POST'])
